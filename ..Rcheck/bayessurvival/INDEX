@@ -1,0 +1,46 @@
+LDDPsurvival.default    Default method for LDDPsurvival
+apply_halabi_singh_censoring
+                        Apply Halabi-Singh Censoring Method
+bayes_np_impute         bayes_np_impute: Non-parametric Bayesian
+                        imputation for right-censored survival data
+                        using a _Linear Dependent Dirichlet-Process_
+                        model (originally from *DPpackage*).
+bayesian_impute         Bayesian Imputation for Censored Survival Data
+complete                Extract completed datasets
+complete.bayesian_imputation
+                        Extract Complete Datasets from Bayesian
+                        Imputation
+complete.bayesian_imputation_groups
+                        Complete method for bayesian_imputation_groups
+                        objects
+event_probability       Event probability by clinical time horizons
+event_probability_groups
+                        Event probability by clinical time horizons
+                        (groups)
+export                  Export Imputed Datasets
+generate_complete_datasets
+                        Generate Complete Datasets from Posterior
+                        Distributions
+impute                  Unified impute() wrapper
+plot.LDDPsurvival       Plot method for LDDPsurvival objects
+plot.bayesian_imputation
+                        Plot method for bayesian_imputation objects
+plot.bayesian_imputation_groups
+                        Plot method for bayesian_imputation_groups
+                        objects
+prepare_survival_data   Prepare Survival Data for Bayesian Imputation
+print.LDDPsurvival      Print method for LDDPsurvival objects
+print.bayesian_imputation
+                        Print method for bayesian_imputation objects
+print.bayesian_imputation_groups
+                        Print method for bayesian_imputation_groups
+                        objects
+print.summaryLDDPsurvival
+                        Print method for summaryLDDPsurvival objects
+print.survival_data     Print method for survival_data objects,
+                        primarily an older debugging/validation tool
+quick_export            Quick Export Function
+quick_impute            Quick Survival Analysis Setup
+simulate_survival_data
+                        Generate Survival Data from Known Distribution
+summary.LDDPsurvival    Summary method for LDDPsurvival objects

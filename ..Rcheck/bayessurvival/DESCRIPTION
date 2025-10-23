@@ -27,38 +27,18 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 URL: https://github.com/Jamie-Wilson-UL/bayessurvival
 BugReports: https://github.com/Jamie-Wilson-UL/bayessurvival/issues
-Depends: 
-    R (>= 4.1.0)
-Imports:
-    posterior (>= 1.4.0),
-    survival (>= 3.4.0),
-    ggplot2 (>= 3.4.0),
-    gridExtra,
-    haven,
-    scales,
-    rlang (>= 1.1.0),
-    checkmate (>= 2.2.0),
-    logspline (>= 2.1.16),
-    methods,
-    stats,
-    graphics
-Suggests:
-    cmdstanr (>= 0.5.0),
-    bayesplot,
-    writexl,
-    withr,
-    testthat (>= 3.0.0),
-    knitr (>= 1.42),
-    rmarkdown (>= 2.21),
-    covr (>= 3.6.0),
-    shiny (>= 1.7.0),
-    DT (>= 0.27),
-    plotly (>= 4.10.0),
-    flexsurv (>= 2.2.0),
-    coda (>= 0.19)
+Depends: R (>= 4.1.0)
+Imports: posterior (>= 1.4.0), survival (>= 3.4.0), ggplot2 (>= 3.4.0),
+        gridExtra, haven, scales, rlang (>= 1.1.0), checkmate (>=
+        2.2.0), logspline (>= 2.1.16), methods, stats, graphics
+Suggests: cmdstanr (>= 0.5.0), bayesplot, writexl, withr, testthat (>=
+        3.0.0), knitr (>= 1.42), rmarkdown (>= 2.21), covr (>= 3.6.0),
+        shiny (>= 1.7.0), DT (>= 0.27), plotly (>= 4.10.0), flexsurv
+        (>= 2.2.0), coda (>= 0.19)
 VignetteBuilder: knitr
-SystemRequirements: CmdStan (https://mc-stan.org/cmdstanr/articles/cmdstanr.html)
-SystemRequirements: Stan models in inst/stan/ are compiled executables required for Bayesian inference
+SystemRequirements: Stan models in inst/stan/ are compiled executables
+        required for Bayesian inference
 LazyData: true
 Config/testthat/edition: 3
 Additional_repositories: https://mc-stan.org/r-packages/
+Built: R 4.4.0; aarch64-apple-darwin20; 2025-10-23 10:41:29 UTC; unix

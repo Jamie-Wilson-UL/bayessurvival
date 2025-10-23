@@ -14,6 +14,8 @@
 ^inst/stan/.*\.exe$
 ^inst/stan/.*\.o$
 ^inst/stan/.*\.hpp$
+^inst/stan/.*\.d$
+^inst/stan/.*\.dSYM$
 
 # Exclude demo and test files that aren't part of package
 ^demo_.*\.R$
@@ -35,6 +37,11 @@
 # Exclude OS files
 ^\.DS_Store$
 ^Thumbs\.db$
+^\.git$
+^\.github$
+^\.Rproj\.user$
+^\.gitignore$
+^\.Rcheck$
 
 # Exclude poster outputs and examples
 ^poster_outputs$
