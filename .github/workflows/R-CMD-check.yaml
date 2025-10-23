@@ -54,11 +54,10 @@ jobs:
               "writexl", "withr", "rmarkdown", "covr", "shiny", "DT", "plotly",
               "flexsurv", "coda"
             ),
-            repos = repos
+            repos = repos,
+            dependencies = TRUE
           )
-          if (!requireNamespace("rcmdcheck", quietly = TRUE)) {
-            install.packages("rcmdcheck", repos = repos)
-          }
+          install.packages("rcmdcheck", repos = repos)
 
       # Skip CmdStan installation for CI - tests will skip appropriately
       # - name: Install CmdStan
