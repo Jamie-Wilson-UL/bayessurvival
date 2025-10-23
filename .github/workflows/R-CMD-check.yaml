@@ -48,7 +48,19 @@ jobs:
             "https://packagemanager.posit.co/cran/latest",
             "https://cran.rstudio.com"
           ))
-          install.packages("rcmdcheck")
+          install.packages(c(
+            "rcmdcheck",
+            "posterior",
+            "survival",
+            "ggplot2",
+            "gridExtra",
+            "haven",
+            "scales",
+            "rlang",
+            "checkmate",
+            "logspline",
+            "testthat"
+          ))
 
       # Skip CmdStan installation for CI - tests will skip appropriately
       # - name: Install CmdStan
