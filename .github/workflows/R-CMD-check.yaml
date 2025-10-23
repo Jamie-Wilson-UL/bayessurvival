@@ -48,8 +48,9 @@ jobs:
         run: |
           install.packages("cmdstanr", repos = c("https://mc-stan.org/r-packages/", getOption("repos")))
           cmdstanr::check_cmdstan_toolchain(fix = TRUE, quiet = TRUE)
-          cmdstanr::install_cmdstan(cores = 2, quiet = TRUE)
+          cmdstanr::install_cmdstan(cores = 2, quiet = TRUE, overwrite = TRUE)
         shell: Rscript {0}
+        timeout-minutes: 15
 
       - uses: r-lib/actions/check-r-package@v2
         with:
