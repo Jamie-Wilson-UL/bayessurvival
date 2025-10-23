@@ -1,0 +1,153 @@
+# Utility functions for bayessurvival package
+
+#' Check if required packages are available
+#' @keywords internal
+check_required_packages <- function() {
+  required <- c("cmdstanr", "posterior", "survival", "ggplot2", "dplyr")
+  missing <- required[!sapply(required, requireNamespace, quietly = TRUE)]
+  
+  if (length(missing) > 0) {
+    stop("Required packages not available: ", paste(missing, collapse = ", "),
+         "\nPlease install with: install.packages(c(", 
+         paste0("'", missing, "'", collapse = ", "), "))")
+  }
+}
+
+#' Check if CmdStan is installed
+#' @keywords internal
+check_cmdstan <- function() {
+  if (!requireNamespace("cmdstanr", quietly = TRUE)) {
+    stop(
+      "The 'cmdstanr' package is required but not installed. ",
+      "Install with: install.packages('cmdstanr')",
+      call. = FALSE
+    )
+  }
+
+  ok <- tryCatch({
+    cmdstanr::cmdstan_version(); TRUE
+  }, error = function(e) FALSE)
+
+  if (!ok) {
+    stop(
+      "CmdStan is not installed or not found. ",
+      "Install with: cmdstanr::install_cmdstan()",
+      call. = FALSE
+    )
+  }
+
+  invisible(TRUE)
+}
+
+
+#' Format time for display
+#' @param time_seconds Time in seconds
+#' @return Formatted time string
+#' @keywords internal
+format_time <- function(time_seconds) {
+  if (time_seconds < 60) {
+    return(sprintf("%.1f seconds", time_seconds))
+  } else if (time_seconds < 3600) {
+    return(sprintf("%.1f minutes", time_seconds / 60))
+  } else {
+    return(sprintf("%.1f hours", time_seconds / 3600))
+  }
+}
+
+#' Safe evaluation with error handling
+#' @param expr Expression to evaluate
+#' @param error_msg Custom error message
+#' @return Result of expression or error
+#' @keywords internal
+safe_eval <- function(expr, error_msg = "An error occurred") {
+  tryCatch(
+    expr,
+    error = function(e) {
+      stop(error_msg, ": ", e$message, call. = FALSE)
+    }
+  )
+}
+
+
+# Get data summary
+get_data_summary <- function(data, time_col, status_col, verbose = TRUE) {
+  
+  n_total <- nrow(data)
+  n_observed <- sum(data[[status_col]] == 1)
+  n_censored <- sum(data[[status_col]] == 0)
+  censoring_rate <- n_censored / n_total
+  
+  if (verbose) {
+    cat("  Total observations:", n_total, "\n")
+    cat("  Observed events:", n_observed, "\n") 
+    cat("  Censored observations:", n_censored, "\n")
+    cat("  Censoring rate:", round(censoring_rate * 100, 1), "%\n")
+  }
+  
+  return(list(
+    n_total = n_total,
+    n_observed = n_observed,
+    n_censored = n_censored,
+    censoring_rate = censoring_rate
+  ))
+}
+
+
+# Get default MCMC options
+get_default_mcmc_options <- function() {
+  return(list(
+    iter_warmup = 1000,
+    iter_sampling = 1000,
+    chains = 4,
+    adapt_delta = 0.95,
+    max_treedepth = 12
+  ))
+}
+
+
+# Extract MCMC summary (distribution-agnostic)
+extract_mcmc_summary <- function(stan_fit, distribution = "weibull") {
+  
+  # Get parameter names based on distribution
+  param_names <- get_distribution_params(distribution)
+  
+  # Add log_lik_total 
+  all_vars <- c(param_names, "log_lik_total")
+  
+  # Extract parameter summaries
+  param_summary <- stan_fit$summary(variables = all_vars)
+  
+  # Extract diagnostics
+  diagnostics <- stan_fit$diagnostic_summary()
+  
+  return(list(
+    parameters = param_summary,
+    diagnostics = diagnostics
+  ))
+}
+
+#' Get parameter names for a distribution
+#' @param distribution Distribution name ("weibull", "exponential", "lognormal")
+#' @return Character vector of parameter names
+#' @keywords internal
+get_distribution_params <- function(distribution) {
+  switch(distribution,
+    "weibull" = c("shape", "scale"),
+    "exponential" = "rate",
+    "lognormal" = c("mu", "sigma"),
+    stop("Unknown distribution: ", distribution, ". Supported distributions: weibull, exponential, lognormal")
+  )
+}
+
+#' Get parameter labels for plotting
+#' @param distribution Distribution name ("weibull", "exponential", "lognormal")
+#' @return Character vector of parameter labels for plots
+#' @keywords internal
+get_distribution_param_labels <- function(distribution) {
+  switch(distribution,
+    "weibull" = c("Shape Parameter", "Scale Parameter"),
+    "exponential" = "Rate Parameter",
+    "lognormal" = c("Location Parameter (mu)", "Scale Parameter (sigma)"),
+    stop("Unknown distribution: ", distribution, ". Supported distributions: weibull, exponential, lognormal")
+  )
+} 

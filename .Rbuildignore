@@ -1,0 +1,43 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^README\.Rmd$
+^LICENSE\.md$
+^\.github$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^\.travis\.yml$
+^codecov\.yml$
+
+# Exclude compiled Stan models (executables without .stan extension)
+^inst/stan/[^.]*$
+^inst/stan/.*\.exe$
+^inst/stan/.*\.o$
+^inst/stan/.*\.hpp$
+
+# Exclude demo and test files that aren't part of package
+^demo_.*\.R$
+^test_.*\.R$
+
+# Exclude R history and data files
+^\.Rhistory$
+^\.RData$
+^\.Ruserdata$
+
+# Exclude temporary output files from MCMC runs
+^dppackage.*\.out$
+^.*\.tmp$
+
+# Exclude OS files
+^\.DS_Store$
+^Thumbs\.db$
+
+# Exclude poster outputs and examples
+^poster_outputs$
+^examples/.*\.(png|pdf|jpg|jpeg)$
+
+# Exclude development files
+^BPD\.RData$
+^BPD2\.R$
+^USER_GUIDE\.md$
+^.*\.tar\.gz$ 
