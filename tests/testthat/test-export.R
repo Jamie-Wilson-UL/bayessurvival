@@ -4,7 +4,7 @@
 test_that("parametric export saves expected CSVs (all and first)", {
   skip_on_cran()
   skip_if_not_installed("survival")
-  if (!requireNamespace("cmdstanr", quietly = TRUE)) skip("cmdstanr not available")
+  skip_if_not_installed("cmdstanr")
   # Also skip if CmdStan is not installed/configured
   ok <- TRUE
   tryCatch({
@@ -49,7 +49,7 @@ test_that("parametric export saves expected CSVs (all and first)", {
 test_that("group export (combined) saves expected CSV", {
   skip_on_cran()
   skip_if_not_installed("survival")
-  if (!requireNamespace("cmdstanr", quietly = TRUE)) skip("cmdstanr not available")
+  skip_if_not_installed("cmdstanr")
   ok <- TRUE
   tryCatch({
     cmdstanr::cmdstan_path()
