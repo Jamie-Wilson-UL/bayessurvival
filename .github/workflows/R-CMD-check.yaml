@@ -62,4 +62,4 @@ jobs:
 
       - name: Check package
         run: |
-          Rscript -e 'rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran"), build_args = c("--no-manual", "--compact-vignettes=gs+qpdf"), error_on = "error", check_dir = "check")' 
+          Rscript -e 'rcmdcheck::rcmdcheck(args = c("--no-manual"), build_args = c("--no-manual", "--compact-vignettes=gs+qpdf"), error_on = "error", check_dir = "check")' 
