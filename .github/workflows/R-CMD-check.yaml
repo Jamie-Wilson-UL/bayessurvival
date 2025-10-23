@@ -40,16 +40,22 @@ jobs:
           use-public-rspm: true
 
       - name: Install dependencies
+        shell: Rscript {0}
         run: |
-          Rscript -e "install.packages(
+          repos <- c(
+            "https://mc-stan.org/r-packages/",
+            "https://packagemanager.posit.co/cran/latest",
+            "https://cran.rstudio.com"
+          )
+          install.packages(
             c(
-              'rcmdcheck', 'posterior', 'ggplot2', 'gridExtra', 'haven', 'scales', 'rlang',
-              'checkmate', 'logspline', 'knitr', 'testthat', 'cmdstanr', 'bayesplot',
-              'writexl', 'withr', 'rmarkdown', 'covr', 'shiny', 'DT', 'plotly',
-              'flexsurv', 'coda'
+              "rcmdcheck", "posterior", "ggplot2", "gridExtra", "haven", "scales", "rlang",
+              "checkmate", "logspline", "knitr", "testthat", "cmdstanr", "bayesplot",
+              "writexl", "withr", "rmarkdown", "covr", "shiny", "DT", "plotly",
+              "flexsurv", "coda"
             ),
-            repos = c('https://mc-stan.org/r-packages/', 'https://packagemanager.posit.co/cran/__linux__/noble/latest', 'https://cran.rstudio.com')
-          )"
+            repos = repos
+          )
 
       # Skip CmdStan installation for CI - tests will skip appropriately
       # - name: Install CmdStan
