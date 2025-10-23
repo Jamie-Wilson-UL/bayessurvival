@@ -271,6 +271,12 @@ function(formula,
        # calling the fortran code
        #########################################################################################
 
+         # Create temporary directory for Fortran output files
+         temp_dir <- tempdir()
+         old_wd <- getwd()
+         on.exit(setwd(old_wd), add = TRUE)
+         setwd(temp_dir)
+
          foo <- .Fortran("lddpsurvival",
                           nrec      = as.integer(nrec),
                           p         = as.integer(p),
@@ -338,6 +344,15 @@ function(formula,
                           workcpo   = as.double(workcpo),
                           workcpo2  = as.double(workcpo2),
                           PACKAGE="bayessurvival")	
+         
+         # Clean up any dppackage output files created in temp directory
+         dppackage_files <- list.files(pattern = "dppackage.*\\.out$", full.names = TRUE)
+         if (length(dppackage_files) > 0) {
+           unlink(dppackage_files)
+         }
+         
+         # Return to original working directory
+         setwd(old_wd)
          
        #########################################################################################
        # save state
