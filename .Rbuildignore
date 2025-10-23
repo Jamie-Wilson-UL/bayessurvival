@@ -42,6 +42,7 @@
 ^\.Rproj\.user$
 ^\.gitignore$
 ^\.Rcheck$
+^.*\.Rcheck$
 
 # Exclude poster outputs and examples
 ^poster_outputs$
