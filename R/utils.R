@@ -24,6 +24,10 @@ check_cmdstan <- function() {
     )
   }
 
+  if (!requireNamespace("cmdstanr", quietly = TRUE)) {
+    return(FALSE)
+  }
+  
   ok <- tryCatch({
     cmdstanr::cmdstan_version(); TRUE
   }, error = function(e) FALSE)

@@ -24,6 +24,9 @@ compile_stan_models <- function() {
     message("Compiling Stan model: ", model_name)
     
     # Compile model
+    if (!requireNamespace("cmdstanr", quietly = TRUE)) {
+      stop("cmdstanr package required for Stan model compilation")
+    }
     model <- cmdstanr::cmdstan_model(stan_file)
     
     # Store in package environment
@@ -54,6 +57,9 @@ get_stan_model <- function(model_name) {
   }
 
   message("Compiling Stan model: ", model_name)
+  if (!requireNamespace("cmdstanr", quietly = TRUE)) {
+    stop("cmdstanr package required for Stan model compilation")
+  }
   model <- cmdstanr::cmdstan_model(stan_file)
   .bayessurvival_env[[model_key]] <- model
   model

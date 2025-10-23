@@ -28,7 +28,6 @@ BugReports: https://github.com/Jamie-Wilson-UL/bayessurvival/issues
 Depends: 
     R (>= 4.1.0)
 Imports:
-    cmdstanr (>= 0.5.0),
     posterior (>= 1.4.0),
     survival (>= 3.4.0),
     ggplot2 (>= 3.4.0),
@@ -42,6 +41,7 @@ Imports:
     stats,
     graphics
 Suggests:
+    cmdstanr (>= 0.5.0),
     bayesplot,
     writexl,
     withr,
