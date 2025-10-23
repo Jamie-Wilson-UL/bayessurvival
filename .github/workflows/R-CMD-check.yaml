@@ -26,7 +26,6 @@ jobs:
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-      R_KEEP_PKG_SOURCE: yes
       _R_CHECK_FORCE_SUGGESTS_: "false"
 
     steps:
@@ -42,20 +41,11 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: |
-            rcmdcheck
-            posterior
-            survival
-            ggplot2
-            gridExtra
-            haven
-            scales
-            rlang
-            checkmate
-            logspline
-            testthat
+          extra-packages: any::rcmdcheck
           needs: check
 
-      - name: Check package
-        run: |
-          Rscript -e 'rcmdcheck::rcmdcheck(args = c("--no-manual"), build_args = c("--no-manual", "--compact-vignettes=gs+qpdf"), error_on = "error", check_dir = "check")' 
+      - uses: r-lib/actions/check-r-package@v2
+        with:
+          build_args: 'c("--no-manual","--no-build-vignettes")'
+          args: 'c("--no-manual","--as-cran","--ignore-vignettes")'
+          error-on: 'error' 
