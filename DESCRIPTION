@@ -1,7 +1,6 @@
 Package: bayessurvival
 Title: Bayesian Imputation for Censored Survival Data
 Version: 0.1.0.9000
-Author: Shirin Moghaddam <Shirin.Moghaddam@ul.ie>
 Maintainer: Shirin Moghaddam <Shirin.Moghaddam@ul.ie>
 Authors@R: 
     c(
