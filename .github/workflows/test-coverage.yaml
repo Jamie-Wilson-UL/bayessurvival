@@ -21,10 +21,9 @@ jobs:
         with:
           use-public-rspm: true
 
-      - uses: r-lib/actions/setup-r-dependencies@v2
-        with:
-          extra-packages: any::covr
-          needs: coverage
+      - name: Install covr
+        run: |
+          Rscript -e 'install.packages("covr", repos = c("https://packagemanager.posit.co/cran/__linux__/noble/latest", "https://cran.rstudio.com"))'
 
       # Skip CmdStan installation for CI - tests will skip appropriately
       # - name: Install CmdStan
