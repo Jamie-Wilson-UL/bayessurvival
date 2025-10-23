@@ -43,20 +43,12 @@ jobs:
       - name: Install dependencies
         shell: Rscript {0}
         run: |
-          repos <- c(
+          options(repos = c(
             "https://mc-stan.org/r-packages/",
             "https://packagemanager.posit.co/cran/latest",
             "https://cran.rstudio.com"
-          )
-          install.packages(
-            c(
-              "posterior", "survival", "ggplot2", "gridExtra", "haven", "scales",
-              "rlang", "checkmate", "logspline", "testthat", "knitr"
-            ),
-            repos = repos,
-            dependencies = TRUE
-          )
-          install.packages("rcmdcheck", repos = repos)
+          ))
+          install.packages("rcmdcheck")
 
       # Skip CmdStan installation for CI - tests will skip appropriately
       # - name: Install CmdStan
@@ -69,4 +61,4 @@ jobs:
 
       - name: Check package
         run: |
-          Rscript -e 'rcmdcheck::rcmdcheck(args = c("--no-manual"), build_args = c("--no-manual", "--compact-vignettes=gs+qpdf"), deps = c("Depends", "Imports", "LinkingTo"), error_on = "error", check_dir = "check")' 
+          Rscript -e 'rcmdcheck::rcmdcheck(args = c("--no-manual"), build_args = c("--no-manual", "--compact-vignettes=gs+qpdf"), error_on = "error", check_dir = "check")' 
