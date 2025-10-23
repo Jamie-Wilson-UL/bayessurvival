@@ -5,6 +5,8 @@ test_that("parametric export saves expected CSVs (all and first)", {
   skip_on_cran()
   skip_if_not_installed("survival")
   skip_if_not_installed("cmdstanr")
+  # Skip entirely on CI to avoid CmdStan installation issues
+  if (Sys.getenv("CI") == "true") skip("Skipping on CI due to CmdStan requirements")
   # Also skip if CmdStan is not installed/configured
   ok <- TRUE
   tryCatch({
@@ -50,6 +52,8 @@ test_that("group export (combined) saves expected CSV", {
   skip_on_cran()
   skip_if_not_installed("survival")
   skip_if_not_installed("cmdstanr")
+  # Skip entirely on CI to avoid CmdStan installation issues
+  if (Sys.getenv("CI") == "true") skip("Skipping on CI due to CmdStan requirements")
   ok <- TRUE
   tryCatch({
     cmdstanr::cmdstan_path()
