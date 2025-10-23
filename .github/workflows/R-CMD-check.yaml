@@ -41,15 +41,15 @@ jobs:
 
       - name: Install dependencies
         run: |
-          Rscript -e 'install.packages(
+          Rscript -e "install.packages(
             c(
-              "rcmdcheck", "posterior", "ggplot2", "gridExtra", "haven", "scales", "rlang",
-              "checkmate", "logspline", "knitr", "testthat", "cmdstanr", "bayesplot",
-              "writexl", "withr", "rmarkdown", "covr", "shiny", "DT", "plotly",
-              "flexsurv", "coda"
+              'rcmdcheck', 'posterior', 'ggplot2', 'gridExtra', 'haven', 'scales', 'rlang',
+              'checkmate', 'logspline', 'knitr', 'testthat', 'cmdstanr', 'bayesplot',
+              'writexl', 'withr', 'rmarkdown', 'covr', 'shiny', 'DT', 'plotly',
+              'flexsurv', 'coda'
             ),
-            repos = c("https://mc-stan.org/r-packages/", "https://packagemanager.posit.co/cran/__linux__/noble/latest", "https://cran.rstudio.com")
-          )'
+            repos = c('https://mc-stan.org/r-packages/', 'https://packagemanager.posit.co/cran/__linux__/noble/latest', 'https://cran.rstudio.com')
+          )"
 
       # Skip CmdStan installation for CI - tests will skip appropriately
       # - name: Install CmdStan
