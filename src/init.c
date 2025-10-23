@@ -3,12 +3,12 @@
 #include <R_ext/Rdynload.h>
 
 /* .Fortran calls */
-extern void F77_NAME(lddpsurvival)(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
+extern void F77_NAME(lddpsurvival)(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
 extern void F77_NAME(hpd)(void *, void *, void *, void *, void *);
 
 /* 'lddpsurvival' and 'hpd' are vendored from DPpackage (Jara et al.) */
 static const R_FortranMethodDef FortranEntries[] = {
-    {"lddpsurvival", (DL_FUNC) &F77_NAME(lddpsurvival), 64},
+    {"lddpsurvival", (DL_FUNC) &F77_NAME(lddpsurvival), 65},
     {"hpd",          (DL_FUNC) &F77_NAME(hpd),           5},
     {NULL, NULL, 0}
 };
