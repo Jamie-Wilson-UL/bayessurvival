@@ -27,6 +27,7 @@ jobs:
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       R_KEEP_PKG_SOURCE: yes
+      _R_CHECK_FORCE_SUGGESTS_: "false"
 
     steps:
       - uses: actions/checkout@v4
@@ -49,10 +50,8 @@ jobs:
           )
           install.packages(
             c(
-              "posterior", "ggplot2", "gridExtra", "haven", "scales", "rlang",
-              "checkmate", "logspline", "knitr", "testthat", "cmdstanr", "bayesplot",
-              "writexl", "withr", "rmarkdown", "covr", "shiny", "DT", "plotly",
-              "flexsurv", "coda"
+              "posterior", "survival", "ggplot2", "gridExtra", "haven", "scales",
+              "rlang", "checkmate", "logspline", "testthat", "knitr"
             ),
             repos = repos,
             dependencies = TRUE
@@ -70,4 +69,4 @@ jobs:
 
       - name: Check package
         run: |
-          Rscript -e 'rcmdcheck::rcmdcheck(args = c("--no-manual"), build_args = c("--no-manual", "--compact-vignettes=gs+qpdf"), error_on = "error", check_dir = "check")' 
+          Rscript -e 'rcmdcheck::rcmdcheck(args = c("--no-manual"), build_args = c("--no-manual", "--compact-vignettes=gs+qpdf"), deps = c("Depends", "Imports", "LinkingTo"), error_on = "error", check_dir = "check")' 
