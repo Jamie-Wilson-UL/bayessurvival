@@ -23,7 +23,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          Rscript -e 'install.packages(c("covr", "posterior", "ggplot2", "gridExtra", "haven", "scales", "rlang", "checkmate", "logspline", "knitr"), repos = c("https://packagemanager.posit.co/cran/__linux__/noble/latest", "https://cran.rstudio.com"))'
+          Rscript -e 'install.packages(c("covr", "posterior", "ggplot2", "gridExtra", "haven", "scales", "rlang", "checkmate", "logspline", "knitr", "testthat"), repos = c("https://packagemanager.posit.co/cran/__linux__/noble/latest", "https://cran.rstudio.com"))'
 
       # Skip CmdStan installation for CI - tests will skip appropriately
       # - name: Install CmdStan
