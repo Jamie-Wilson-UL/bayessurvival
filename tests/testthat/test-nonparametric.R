@@ -16,4 +16,10 @@ test_that("bayes_np_impute runs and returns expected structure", {
   expect_true(is.list(result$fit))
   expect_true(is.matrix(result$fit$save.state$ysave))
   expect_true(result$diagnostics$convergence_ok)
+  
+  # Clean up any dppackage output files created during the test
+  dppackage_files <- list.files(pattern = "dppackage.*\\.out$", full.names = TRUE)
+  if (length(dppackage_files) > 0) {
+    unlink(dppackage_files)
+  }
 })

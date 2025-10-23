@@ -26,6 +26,10 @@
 
 # Exclude temporary output files from MCMC runs
 ^dppackage.*\.out$
+^dppackage1\.out$
+^dppackage2\.out$
+^dppackage3\.out$
+^dppackage4\.out$
 ^.*\.tmp$
 
 # Exclude OS files
