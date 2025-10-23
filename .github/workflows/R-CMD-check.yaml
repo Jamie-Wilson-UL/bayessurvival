@@ -49,13 +49,16 @@ jobs:
           )
           install.packages(
             c(
-              "rcmdcheck", "posterior", "ggplot2", "gridExtra", "haven", "scales", "rlang",
+              "posterior", "ggplot2", "gridExtra", "haven", "scales", "rlang",
               "checkmate", "logspline", "knitr", "testthat", "cmdstanr", "bayesplot",
               "writexl", "withr", "rmarkdown", "covr", "shiny", "DT", "plotly",
               "flexsurv", "coda"
             ),
             repos = repos
           )
+          if (!requireNamespace("rcmdcheck", quietly = TRUE)) {
+            install.packages("rcmdcheck", repos = repos)
+          }
 
       # Skip CmdStan installation for CI - tests will skip appropriately
       # - name: Install CmdStan
