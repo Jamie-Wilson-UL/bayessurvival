@@ -6,6 +6,7 @@
 extern void F77_NAME(lddpsurvival)(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
 extern void F77_NAME(hpd)(void *, void *, void *, void *, void *);
 
+/* 'lddpsurvival' and 'hpd' are vendored from DPpackage (Jara et al.) */
 static const R_FortranMethodDef FortranEntries[] = {
     {"lddpsurvival", (DL_FUNC) &F77_NAME(lddpsurvival), 64},
     {"hpd",          (DL_FUNC) &F77_NAME(hpd),           5},
@@ -22,7 +23,7 @@ void R_init_bayessurvival(DllInfo *dll)
     R_useDynamicSymbols(dll, FALSE);
 
 #ifdef _WIN32
-    /* gfortran initialization sets these to _O_BINARY */
+    /* gfortran initialisation sets these to _O_BINARY */
     setmode(1, _O_TEXT); /* stdout */
     setmode(2, _O_TEXT); /* stderr */
 #endif
