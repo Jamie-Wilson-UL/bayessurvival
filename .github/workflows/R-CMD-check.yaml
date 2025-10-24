@@ -44,9 +44,6 @@ jobs:
           extra-packages: |
             any::rcmdcheck
             any::testthat
-            any::survival
-            any::cmdstanr
-            any::bayesplot
           needs: check
           dependencies: '"hard"'
 
