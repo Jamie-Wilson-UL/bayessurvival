@@ -1,6 +1,9 @@
 # Use R's default Fortran compilation flags for portability
 OBJECTS = LDDPsurvival.o LDDPdensity.o ToolsDP.o ToolsSlice.o ToolsDistributions.o ToolsCDF.o ToolsCdflib.o ToolsPolynomials.o ToolsIntegrate.o ToolsMatrix.o ToolsStat.o ToolsRandlib.o ToolsSweep.o ToolsSparseMatrix.o ToolsRfun.o ToolsHPDreg.o ToolsBDP.o ToolsRnumbers.o ToolsDDP.o ToolsLDTFP.o
 
+# Suppress legacy Fortran warnings from DPpackage-derived code
+FFLAGS += -std=legacy -Wno-intrinsic-shadow
+
 PKG_LIBS = $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
 
 all: $(SHLIB)
