@@ -41,7 +41,12 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::rcmdcheck
+          extra-packages: |
+            any::rcmdcheck
+            any::testthat
+            any::survival
+            any::cmdstanr
+            any::bayesplot
           needs: check
           dependencies: '"hard"'
 
