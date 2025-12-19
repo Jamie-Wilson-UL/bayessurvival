@@ -3,7 +3,7 @@
 #' Check if required packages are available
 #' @keywords internal
 check_required_packages <- function() {
-  required <- c("cmdstanr", "posterior", "survival", "ggplot2", "dplyr")
+  required <- c("rstan", "posterior", "survival", "ggplot2")
   missing <- required[!sapply(required, requireNamespace, quietly = TRUE)]
   
   if (length(missing) > 0) {
@@ -13,29 +13,13 @@ check_required_packages <- function() {
   }
 }
 
-#' Check if CmdStan is installed
+#' Check if rstan is installed
 #' @keywords internal
-check_cmdstan <- function() {
-  if (!requireNamespace("cmdstanr", quietly = TRUE)) {
+check_rstan <- function() {
+  if (!requireNamespace("rstan", quietly = TRUE)) {
     stop(
-      "The 'cmdstanr' package is required but not installed. ",
-      "Install with: install.packages('cmdstanr')",
-      call. = FALSE
-    )
-  }
-
-  if (!requireNamespace("cmdstanr", quietly = TRUE)) {
-    return(FALSE)
-  }
-  
-  ok <- tryCatch({
-    cmdstanr::cmdstan_version(); TRUE
-  }, error = function(e) FALSE)
-
-  if (!ok) {
-    stop(
-      "CmdStan is not installed or not found. ",
-      "Install with: cmdstanr::install_cmdstan()",
+      "The 'rstan' package is required but not installed. ",
+      "Install with: install.packages('rstan')",
       call. = FALSE
     )
   }
@@ -118,11 +102,27 @@ extract_mcmc_summary <- function(stan_fit, distribution = "weibull") {
   # Add log_lik_total 
   all_vars <- c(param_names, "log_lik_total")
   
-  # Extract parameter summaries
-  param_summary <- stan_fit$summary(variables = all_vars)
-  
-  # Extract diagnostics
-  diagnostics <- stan_fit$diagnostic_summary()
+  draws <- posterior::subset_draws(
+    posterior::as_draws_df(stan_fit),
+    variable = all_vars
+  )
+  param_summary <- posterior::summarise_draws(draws)
+
+  sampler_params <- tryCatch(
+    rstan::get_sampler_params(stan_fit, inc_warmup = FALSE),
+    error = function(e) NULL
+  )
+  diagnostics <- NULL
+  if (!is.null(sampler_params) && length(sampler_params) > 0) {
+    diagnostics <- data.frame(
+      chain = seq_along(sampler_params),
+      num_divergent = vapply(sampler_params, function(m) {
+        if (!("divergent__" %in% colnames(m))) return(NA_real_)
+        sum(m[, "divergent__"] > 0)
+      }, numeric(1)),
+      stringsAsFactors = FALSE
+    )
+  }
   
   return(list(
     parameters = param_summary,

@@ -8,6 +8,8 @@
 ^pkgdown$
 ^\.travis\.yml$
 ^codecov\.yml$
+^\.Rlib$
+^\.tmp$
 
 # Exclude compiled Stan models (executables without .stan extension)
 ^inst/stan/[^.]*$
@@ -16,6 +18,11 @@
 ^inst/stan/.*\.hpp$
 ^inst/stan/.*\.d$
 ^inst/stan/.*\.dSYM$
+
+# Exclude compiled artifacts in src/ (should never be committed)
+^src/.*\.o$
+^src/.*\.so$
+^src/.*\.dll$
 
 # Exclude demo and test files that aren't part of package
 ^demo_.*\.R$
@@ -37,6 +44,7 @@
 # Exclude OS files
 ^\.DS_Store$
 ^Thumbs\.db$
+^tests/\.DS_Store$
 ^\.git$
 ^\.github$
 ^\.Rproj\.user$
@@ -52,4 +60,5 @@
 ^BPD\.RData$
 ^BPD2\.R$
 ^USER_GUIDE\.md$
-^.*\.tar\.gz$ 
+^.*\.tar\.gz$
+^lung_imputed_dataset_1\.csv$

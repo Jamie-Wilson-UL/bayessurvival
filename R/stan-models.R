@@ -4,7 +4,7 @@
 #' Compile and cache Stan models
 #' @keywords internal
 compile_stan_models <- function() {
-  check_cmdstan()
+  check_rstan()
   
   # Define available models
   models <- list(
@@ -24,10 +24,7 @@ compile_stan_models <- function() {
     message("Compiling Stan model: ", model_name)
     
     # Compile model
-    if (!requireNamespace("cmdstanr", quietly = TRUE)) {
-      stop("cmdstanr package required for Stan model compilation")
-    }
-    model <- cmdstanr::cmdstan_model(stan_file)
+    model <- rstan::stan_model(file = stan_file, model_name = paste0("bayessurvival_", model_name))
     
     # Store in package environment
     .bayessurvival_env[[paste0(model_name, "_model")]] <- model
@@ -49,7 +46,7 @@ get_stan_model <- function(model_name) {
   }
 
   # Compile on demand 
-  check_cmdstan()
+  check_rstan()
   stan_filename <- paste0(model_name, "_imputation.stan")
   stan_file <- system.file("stan", stan_filename, package = "bayessurvival")
   if (!nzchar(stan_file) || !file.exists(stan_file)) {
@@ -57,10 +54,7 @@ get_stan_model <- function(model_name) {
   }
 
   message("Compiling Stan model: ", model_name)
-  if (!requireNamespace("cmdstanr", quietly = TRUE)) {
-    stop("cmdstanr package required for Stan model compilation")
-  }
-  model <- cmdstanr::cmdstan_model(stan_file)
+  model <- rstan::stan_model(file = stan_file, model_name = paste0("bayessurvival_", model_name))
   .bayessurvival_env[[model_key]] <- model
   model
 }

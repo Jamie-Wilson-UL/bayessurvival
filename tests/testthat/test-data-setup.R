@@ -125,9 +125,6 @@ test_that("detect_survival_column detects binary columns for status", {
 })
 
 test_that("bayesian_impute.survival_data method works", {
-  skip_if_not_installed("cmdstanr")
-  skip("Skipping Stan-dependent test")
-  
   test_data <- data.frame(
     time = c(10, 15, 20),
     status = c(1, 0, 1) 
@@ -135,8 +132,7 @@ test_that("bayesian_impute.survival_data method works", {
   
   survival_data <- prepare_survival_data(test_data, verbose = FALSE)
   
-  # Mock the default method to avoid Stan compilation in tests
-  # In real tests, this would call the actual Stan fitting
+  # Mock the default method to avoid Stan compilation 
   expect_no_error({
     # This would normally run: result <- bayesian_impute(survival_data)
     # For testing, we just verify the method dispatch works
@@ -163,15 +159,12 @@ test_that("print.survival_data works correctly", {
 })
 
 test_that("quick_impute provides one-liner functionality", {
-  skip_if_not_installed("cmdstanr")
-  skip("Skipping Stan-dependent test")
-  
   test_data <- data.frame(
     time = c(10, 15, 20),
     status = c(1, 0, 1)
   )
   
-  # Test that it would work (without actually running Stan)
+  # Test that it would work 
   expect_no_error({
     # This would normally be: result <- quick_impute(test_data, n_imputations = 2)
     # For testing, we verify the data preparation step works

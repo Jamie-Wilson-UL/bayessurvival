@@ -2,3 +2,14 @@
 .DS_Store
 *.out
 .Rhistory
+*.o
+*.so
+*.dll
+*.tar.gz
+*.Rcheck/
+..Rcheck/
+*.RData
+*.Ruserdata
+.Rlib/
+.tmp/
+BPD2.R

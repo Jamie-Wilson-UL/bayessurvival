@@ -29,10 +29,10 @@ test_that("stan_models_ready function works", {
 })
 
 # Note: We skip actual Stan compilation tests in automated testing
-# as they require CmdStan installation 
+# as they require a working C++ toolchain and can be slow.
 test_that("get_stan_model handles missing model gracefully", {
-  skip_if_not_installed("cmdstanr")
-  skip("Skipping Stan compilation test - requires CmdStan installation")
+  skip_if_not_installed("rstan")
+  skip("Skipping Stan compilation test - requires rstan toolchain")
   
   # This should trigger compilation attempt
   expect_error(

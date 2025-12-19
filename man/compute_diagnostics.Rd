@@ -4,12 +4,14 @@
 \alias{compute_diagnostics}
 \title{Compute MCMC diagnostics}
 \usage{
-compute_diagnostics(mcmc_result, distribution = "weibull")
+compute_diagnostics(mcmc_result, distribution = "weibull", mcmc_options = NULL)
 }
 \arguments{
 \item{mcmc_result}{Stan sampling result}
 
 \item{distribution}{Distribution name to determine which parameters to check}
+
+\item{mcmc_options}{Optional MCMC options list (used for max treedepth hits)}
 }
 \value{
 List of diagnostic information

@@ -1,9 +1,6 @@
 # Tests for the complete() function
 
 test_that("complete() extracts single dataset correctly", {
-  skip_if_not_installed("cmdstanr")
-  skip("Skipping Stan-dependent test")
-  
   # Create mock bayesian_imputation object for testing
   mock_data <- data.frame(
     time = c(10, 15, 20, 25, 30),
@@ -39,9 +36,6 @@ test_that("complete() extracts single dataset correctly", {
 })
 
 test_that("complete() extracts all datasets correctly", {
-  skip_if_not_installed("cmdstanr") 
-  skip("Skipping Stan-dependent test")
-  
   # Create mock data (same as above)
   mock_data <- data.frame(
     time = c(10, 15, 20, 25, 30),
@@ -75,9 +69,6 @@ test_that("complete() extracts all datasets correctly", {
 })
 
 test_that("complete() produces long format correctly", {
-  skip_if_not_installed("cmdstanr")
-  skip("Skipping Stan-dependent test") 
-  
   # Create simple mock data
   mock_data <- data.frame(
     time = c(10, 15),
@@ -143,9 +134,6 @@ test_that("complete() validates inputs correctly", {
 })
 
 test_that("complete() handles include.original correctly", {
-  skip_if_not_installed("cmdstanr")
-  skip("Skipping Stan-dependent test")
-  
   mock_data <- data.frame(
     time = c(10, 15),
     status = c(1, 0)  # One censored observation
@@ -174,9 +162,6 @@ test_that("complete() handles include.original correctly", {
 })
 
 test_that("complete() works with different format arguments", {
-  skip_if_not_installed("cmdstanr")
-  skip("Skipping Stan-dependent test")
-  
   mock_data <- data.frame(time = c(10, 15), status = c(1, 0))
   dataset1 <- data.frame(time = c(10, 18), status = c(1, 1), dataset_id = 1)
   
@@ -187,13 +172,20 @@ test_that("complete() works with different format arguments", {
     imputed_datasets = list(dataset1)
   ), class = "bayesian_imputation")
   
-  # Test wide format (default)
-  result_wide <- complete(mock_result, format = "wide")
-  expect_true(is.data.frame(result_wide))  # Single dataset returns data.frame
+  # Wide format returns a list for dataset = "all" (default)
+  result_wide_all <- complete(mock_result, format = "wide")
+  expect_true(is.list(result_wide_all))
+  expect_equal(length(result_wide_all), 1)
+  expect_true(is.data.frame(result_wide_all$dataset_1))
+
+  # A single numeric dataset returns a data.frame
+  result_wide_one <- complete(mock_result, dataset = 1, format = "wide")
+  expect_true(is.data.frame(result_wide_one))
   
   # Test list format  
-  result_list <- complete(mock_result, format = "list") 
-  expect_true(is.data.frame(result_list))  # Single dataset still returns data.frame
+  result_list <- complete(mock_result, format = "list")
+  expect_true(is.list(result_list))
+  expect_true(is.data.frame(result_list$dataset_1))
   
   # Test long format
   result_long <- complete(mock_result, format = "long")

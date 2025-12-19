@@ -1,5 +1,4 @@
-test_that("package loads without CmdStan", {
-  # This test should pass even without CmdStan installed
+test_that("package loads", {
   expect_true(requireNamespace("bayessurvival", quietly = TRUE))
   
   # Check that basic functions are available

@@ -4,17 +4,9 @@
 test_that("parametric export saves expected CSVs (all and first)", {
   skip_on_cran()
   skip_if_not_installed("survival")
-  skip_if_not_installed("cmdstanr")
-  # Skip entirely on CI to avoid CmdStan installation issues
-  if (Sys.getenv("CI") == "true") skip("Skipping on CI due to CmdStan requirements")
-  # Also skip if CmdStan is not installed/configured
-  ok <- TRUE
-  tryCatch({
-    cmdstanr::cmdstan_path()
-  }, error = function(e) {
-    ok <<- FALSE
-  })
-  if (!ok) skip("CmdStan not installed")
+  skip_if_not_installed("rstan")
+  # Skip entirely on CI to avoid C++ toolchain variability and compilation time
+  if (Sys.getenv("CI") == "true") skip("Skipping on CI (requires Stan compilation)")
 
   td <- withr::local_tempdir()
   file_base_all <- file.path(td, "weibull_results_single")
@@ -51,16 +43,9 @@ test_that("parametric export saves expected CSVs (all and first)", {
 test_that("group export (combined) saves expected CSV", {
   skip_on_cran()
   skip_if_not_installed("survival")
-  skip_if_not_installed("cmdstanr")
-  # Skip entirely on CI to avoid CmdStan installation issues
-  if (Sys.getenv("CI") == "true") skip("Skipping on CI due to CmdStan requirements")
-  ok <- TRUE
-  tryCatch({
-    cmdstanr::cmdstan_path()
-  }, error = function(e) {
-    ok <<- FALSE
-  })
-  if (!ok) skip("CmdStan not installed")
+  skip_if_not_installed("rstan")
+  # Skip entirely on CI to avoid C++ toolchain variability and compilation time
+  if (Sys.getenv("CI") == "true") skip("Skipping on CI (requires Stan compilation)")
 
   td <- withr::local_tempdir()
   file_base <- file.path(td, "weibull_results_groups")
@@ -108,5 +93,4 @@ test_that("nonparametric export saves expected CSV (first)", {
   expect_true(all(c("time", "status", "original_time", "original_status", "was_censored") %in% names(dat)))
   expect_equal(nrow(dat), nrow(res_np$original_data))
 })
-
 

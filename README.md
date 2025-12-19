@@ -17,13 +17,18 @@ The **bayessurvival** package provides Bayesian multiple imputation for right-ce
 devtools::install_github("Jamie-Wilson-UL/bayessurvival")
 ```
 
-### CmdStan requirement
+### Stan backend
 
-Bayesian estimation is carried out via `cmdstanr`. If CmdStan is not available, you will be prompted to install it:
+Stan-based MCMC is provided via `rstan`.
+
+For local multicore sampling:
 
 ```r
-cmdstanr::install_cmdstan()
+rstan::rstan_options(auto_write = TRUE)
+options(mc.cores = parallel::detectCores())
 ```
+
+For the CRAN migration plan (including a possible move to `rstantools` for install-time compilation), see `DEV_PLAN_OPTION_A_RSTAN.md`.
 
 ## Quick Start
 

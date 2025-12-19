@@ -231,15 +231,18 @@ bayesian_impute_single <- function(data, time_col = NULL, status_col = NULL,
   
   start_time <- Sys.time()
   
-  stan_fit <- stan_model$sample(
+  stan_fit <- rstan::sampling(
+    object = stan_model,
     data = stan_data,
-    iter_warmup = mcmc_options$iter_warmup,
-    iter_sampling = mcmc_options$iter_sampling,
+    iter = mcmc_options$iter_warmup + mcmc_options$iter_sampling,
+    warmup = mcmc_options$iter_warmup,
     chains = mcmc_options$chains,
-    parallel_chains = min(mcmc_options$chains, 4),
-    refresh = if(verbose) max(mcmc_options$iter_sampling %/% 10, 1) else 0,
-    adapt_delta = mcmc_options$adapt_delta,
-    max_treedepth = mcmc_options$max_treedepth
+    cores = min(mcmc_options$chains, 4),
+    refresh = if (verbose) max(mcmc_options$iter_sampling %/% 10, 1) else 0,
+    control = list(
+      adapt_delta = mcmc_options$adapt_delta,
+      max_treedepth = mcmc_options$max_treedepth
+    )
   )
   
   end_time <- Sys.time()
@@ -252,7 +255,10 @@ bayesian_impute_single <- function(data, time_col = NULL, status_col = NULL,
   
   # Extract posterior samples for parameters (distribution-specific)
   param_names <- get_distribution_params(distribution)
-  posterior_samples <- stan_fit$draws(param_names)
+  posterior_samples <- posterior::subset_draws(
+    posterior::as_draws_df(stan_fit),
+    variable = param_names
+  )
   
   # Extract posterior distributions for each censored observation
   posterior_imputations <- extract_posterior_distributions(stan_fit, data_summary$n_censored)
@@ -297,7 +303,7 @@ bayesian_impute_single <- function(data, time_col = NULL, status_col = NULL,
       mcmc_options = mcmc_options,
       time_unit = time_unit %||% attr(data, "time_unit") %||% "days"
     ),
-    diagnostics = compute_diagnostics(stan_fit, distribution),
+    diagnostics = compute_diagnostics(stan_fit, distribution, mcmc_options = mcmc_options),
     fit_metrics = fit_metrics
   ), class = "bayesian_imputation")
   
@@ -311,35 +317,24 @@ extract_posterior_distributions <- function(stan_fit, n_censored) {
     return(matrix(numeric(0), nrow = 0, ncol = 0))
   }
   
-  # Extract the t_imputed draws: [draws, chains, n_censored]
-  imputed_arrays <- stan_fit$draws("t_imputed", format = "array")
-  
-  # Get dimensions
-  dims <- dim(imputed_arrays)
-  n_draws <- dims[1]
-  n_chains <- dims[2]
-  
-  # Total posterior draws across all chains
-  total_draws <- n_draws * n_chains
-  
-  # Initialise matrix: rows = posterior draws, cols = censored observations
-  posterior_matrix <- matrix(NA, nrow = total_draws, ncol = n_censored)
-  
-  draw_idx <- 1
-  for (chain in 1:n_chains) {
-    for (draw in 1:n_draws) {
-      # Extract this draw's imputations for all censored observations
-      values <- imputed_arrays[draw, chain, ]
-      posterior_matrix[draw_idx, ] <- as.numeric(values)
-      draw_idx <- draw_idx + 1
-    }
+  out <- rstan::extract(stan_fit, pars = "t_imputed", permuted = TRUE)
+  t_imputed <- out$t_imputed
+  if (is.null(t_imputed)) {
+    stop("t_imputed not found in Stan output")
   }
-  
-  # Remove any rows that are all NA
-  valid_rows <- !apply(is.na(posterior_matrix), 1, all)
-  posterior_matrix <- posterior_matrix[valid_rows, , drop = FALSE]
-  
-  return(posterior_matrix)
+
+  # Expected shape: draws x n_censored
+  if (is.vector(t_imputed)) {
+    t_imputed <- matrix(as.numeric(t_imputed), ncol = 1)
+  }
+  if (!is.matrix(t_imputed)) {
+    t_imputed <- as.matrix(t_imputed)
+  }
+  if (ncol(t_imputed) != n_censored) {
+    stop("Unexpected t_imputed dimensions: expected ", n_censored, " columns, got ", ncol(t_imputed))
+  }
+
+  t_imputed
 }
 
 #' Generate Complete Datasets from Posterior Distributions
@@ -485,34 +480,54 @@ prepare_stan_data <- function(data, time_col, status_col, distribution, priors) 
 #' Compute MCMC diagnostics
 #' @param mcmc_result Stan sampling result
 #' @param distribution Distribution name to determine which parameters to check
+#' @param mcmc_options Optional MCMC options list (used for max treedepth hits)
 #' @return List of diagnostic information
 #' @keywords internal
-compute_diagnostics <- function(mcmc_result, distribution = "weibull") {
-  
-  # Basic diagnostics
-  diagnostics_summary <- mcmc_result$diagnostic_summary()
-  
-  # Determine parameter names based on distribution
+compute_diagnostics <- function(mcmc_result, distribution = "weibull", mcmc_options = NULL) {
   param_names <- get_distribution_params(distribution)
-  
-  # Rhat values
-  rhat_values <- mcmc_result$summary(variables = param_names)$rhat
-  max_rhat <- max(rhat_values, na.rm = TRUE)
-  
-  # Effective sample sizes
-  ess_bulk <- mcmc_result$summary(variables = param_names)$ess_bulk
-  ess_tail <- mcmc_result$summary(variables = param_names)$ess_tail
-  min_ess_bulk <- min(ess_bulk, na.rm = TRUE)
-  min_ess_tail <- min(ess_tail, na.rm = TRUE)
-  
+
+  draws <- posterior::subset_draws(
+    posterior::as_draws_df(mcmc_result),
+    variable = param_names
+  )
+
+  summ <- posterior::summarise_draws(draws, "rhat", "ess_bulk", "ess_tail")
+
+  max_rhat <- max(summ$rhat, na.rm = TRUE)
+  min_ess_bulk <- min(summ$ess_bulk, na.rm = TRUE)
+  min_ess_tail <- min(summ$ess_tail, na.rm = TRUE)
+
+  sampler_params <- tryCatch(
+    rstan::get_sampler_params(mcmc_result, inc_warmup = FALSE),
+    error = function(e) NULL
+  )
+
+  num_divergent <- NA_integer_
+  num_max_treedepth <- NA_integer_
+
+  if (!is.null(sampler_params) && length(sampler_params) > 0) {
+    num_divergent <- sum(vapply(sampler_params, function(m) {
+      if (!("divergent__" %in% colnames(m))) return(0L)
+      sum(m[, "divergent__"] > 0)
+    }, integer(1)))
+
+    if (!is.null(mcmc_options) && !is.null(mcmc_options$max_treedepth)) {
+      max_td <- as.integer(mcmc_options$max_treedepth)
+      num_max_treedepth <- sum(vapply(sampler_params, function(m) {
+        if (!("treedepth__" %in% colnames(m))) return(0L)
+        sum(m[, "treedepth__"] >= max_td)
+      }, integer(1)))
+    }
+  }
+
   list(
-    num_divergent = sum(diagnostics_summary$num_divergent, na.rm = TRUE),
-    any_divergent = any(diagnostics_summary$num_divergent > 0, na.rm = TRUE),
-    num_max_treedepth = sum(diagnostics_summary$num_max_treedepth, na.rm = TRUE),
+    num_divergent = num_divergent,
+    any_divergent = isTRUE(num_divergent > 0),
+    num_max_treedepth = num_max_treedepth,
     max_rhat = max_rhat,
     min_ess_bulk = min_ess_bulk,
     min_ess_tail = min_ess_tail,
-    convergence_ok = max_rhat <= 1.1 && min_ess_bulk >= 100
+    convergence_ok = isTRUE(max_rhat <= 1.1) && isTRUE(min_ess_bulk >= 100)
   )
 } 
 
@@ -717,26 +732,35 @@ bayesian_impute_groups_safe <- function(data, time_col, status_col, groups,
 # Compute WAIC from Stan fit (requires pointwise log-likelihoods in Stan)
 #' @keywords internal
 compute_waic_from_stan <- function(stan_fit, data, time_col, status_col, distribution) {
-  draws <- stan_fit$draws()
-  # Identify variable names written by Stan
-  has_obs <- any(grepl("^ll_obs\\[", posterior::variables(draws)))
-  has_cens <- any(grepl("^ll_cens\\[", posterior::variables(draws)))
-  if (!has_obs && !has_cens) stop("Pointwise log-likelihoods not found in Stan output")
-  
   observed_mask <- data[[status_col]] == 1
   censored_mask <- data[[status_col]] == 0
   n <- nrow(data)
   
-  # If one class is entirely absent and the corresponding pointwise log-lik
-  # is also unavailable from Stan, skip WAIC (not informative / not computable)
-  if (sum(observed_mask) == 0 && !has_cens) return(NULL)
-  if (sum(censored_mask) == 0 && !has_obs) return(NULL)
-  
-  # Extract pointwise ll arrays as draws x count matrices
   ll_obs <- NULL
   ll_cens <- NULL
-  if (has_obs) ll_obs <- as.matrix(stan_fit$draws(variables = "ll_obs"))
-  if (has_cens) ll_cens <- as.matrix(stan_fit$draws(variables = "ll_cens"))
+
+  # Extract pointwise ll arrays as draws x count matrices (if present)
+  if (sum(observed_mask) > 0) {
+    ll_obs <- tryCatch(
+      rstan::extract(stan_fit, pars = "ll_obs", permuted = TRUE)$ll_obs,
+      error = function(e) NULL
+    )
+  }
+  if (sum(censored_mask) > 0) {
+    ll_cens <- tryCatch(
+      rstan::extract(stan_fit, pars = "ll_cens", permuted = TRUE)$ll_cens,
+      error = function(e) NULL
+    )
+  }
+
+  if (is.null(ll_obs) && is.null(ll_cens)) {
+    stop("Pointwise log-likelihoods not found in Stan output")
+  }
+
+  # If one class is entirely absent and the corresponding pointwise log-lik
+  # is also unavailable from Stan, skip WAIC (not informative / not computable)
+  if (sum(observed_mask) == 0 && is.null(ll_cens)) return(NULL)
+  if (sum(censored_mask) == 0 && is.null(ll_obs)) return(NULL)
   
   # Combine into a draws x N matrix aligned to original rows
   S <- nrow(ll_obs) %||% nrow(ll_cens)
