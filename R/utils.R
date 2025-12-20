@@ -92,6 +92,43 @@ get_default_mcmc_options <- function() {
   ))
 }
 
+normalize_mcmc_options <- function(mcmc_options) {
+  defaults <- get_default_mcmc_options()
+
+  if (is.null(mcmc_options)) {
+    return(defaults)
+  }
+
+  if (!is.list(mcmc_options)) {
+    stop("'mcmc_options' must be a list.", call. = FALSE)
+  }
+
+  mcmc_options <- mcmc_options[!vapply(mcmc_options, is.null, logical(1))]
+
+  merged <- modifyList(defaults, mcmc_options)
+
+  merged$iter_warmup <- as.integer(merged$iter_warmup)
+  merged$iter_sampling <- as.integer(merged$iter_sampling)
+  merged$chains <- as.integer(merged$chains)
+  merged$adapt_delta <- as.numeric(merged$adapt_delta)
+  merged$max_treedepth <- as.integer(merged$max_treedepth)
+
+  merged
+}
+
+build_rstan_control <- function(mcmc_options) {
+  mcmc_options <- normalize_mcmc_options(mcmc_options)
+
+  control <- list()
+  if (is.finite(mcmc_options$adapt_delta)) {
+    control$adapt_delta <- mcmc_options$adapt_delta
+  }
+  if (is.finite(mcmc_options$max_treedepth)) {
+    control$max_treedepth <- mcmc_options$max_treedepth
+  }
+  control
+}
+
 
 # Extract MCMC summary (distribution-agnostic)
 extract_mcmc_summary <- function(stan_fit, distribution = "weibull") {

@@ -207,10 +207,8 @@ bayesian_impute_single <- function(data, time_col = NULL, status_col = NULL,
     }
   }
   
-  # Set default MCMC options if not provided
-  if (is.null(mcmc_options)) {
-    mcmc_options <- get_default_mcmc_options()
-  }
+  # Merge user-provided MCMC options with sensible defaults
+  mcmc_options <- normalize_mcmc_options(mcmc_options)
   
   # Prepare Stan data
   stan_data <- prepare_stan_data(data, time_col, status_col, distribution, priors)
@@ -239,10 +237,7 @@ bayesian_impute_single <- function(data, time_col = NULL, status_col = NULL,
     chains = mcmc_options$chains,
     cores = min(mcmc_options$chains, 4),
     refresh = if (verbose) max(mcmc_options$iter_sampling %/% 10, 1) else 0,
-    control = list(
-      adapt_delta = mcmc_options$adapt_delta,
-      max_treedepth = mcmc_options$max_treedepth
-    )
+    control = build_rstan_control(mcmc_options)
   )
   
   end_time <- Sys.time()
