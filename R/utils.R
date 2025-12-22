@@ -105,7 +105,7 @@ normalize_mcmc_options <- function(mcmc_options) {
 
   mcmc_options <- mcmc_options[!vapply(mcmc_options, is.null, logical(1))]
 
-  merged <- modifyList(defaults, mcmc_options)
+  merged <- utils::modifyList(defaults, mcmc_options)
 
   merged$iter_warmup <- as.integer(merged$iter_warmup)
   merged$iter_sampling <- as.integer(merged$iter_sampling)
