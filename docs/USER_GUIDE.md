@@ -55,7 +55,7 @@ fit <- impute(
 )
 ```
 
-By default, `impute()` tries to detect the time and status columns (looking for common names like `time`, `status`, `duration`, etc.). That detection usually succeeds, but if your column names are unusual it’s advisable to specify them explicitly:
+By default, `impute()` tries to detect the time and status columns (looking for common names like `time`, `status`, `duration`, etc.). If your column names are unusual it’s advisable to specify them explicitly:
 
 ```r
 fit <- impute(

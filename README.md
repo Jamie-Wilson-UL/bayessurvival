@@ -28,8 +28,6 @@ rstan::rstan_options(auto_write = TRUE)
 options(mc.cores = parallel::detectCores())
 ```
 
-For the CRAN migration plan (including a possible move to `rstantools` for install-time compilation), see `DEV_PLAN_OPTION_A_RSTAN.md`.
-
 ## Quick Start
 
 ```r
