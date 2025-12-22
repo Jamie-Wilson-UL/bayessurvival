@@ -752,8 +752,8 @@ compute_waic_from_stan <- function(stan_fit, data, time_col, status_col, distrib
     stop("Pointwise log-likelihoods not found in Stan output")
   }
 
-  # If one class is entirely absent and the corresponding pointwise log-lik
-  # is also unavailable from Stan, skip WAIC (not informative / not computable)
+  # If one class is absent and the corresponding pointwise log-lik
+  # is also unavailable from Stan, skip WAIC 
   if (sum(observed_mask) == 0 && is.null(ll_cens)) return(NULL)
   if (sum(censored_mask) == 0 && is.null(ll_obs)) return(NULL)
   
@@ -776,7 +776,7 @@ compute_waic_from_stan <- function(stan_fit, data, time_col, status_col, distrib
   # p_waic = sum_i var_s(log_lik[s,i])
   # WAIC = -2 * (sum_i lppd_i - p_waic)
   maxlog <- apply(log_lik, 2, max)
-  # stabilise exp via subtract-max trick
+  # stabilise exp via subtract-max 
   exp_centered <- exp(sweep(log_lik, 2, maxlog, FUN = "-"))
   mean_exp <- colMeans(exp_centered)
   lppd_i <- log(mean_exp) + maxlog
