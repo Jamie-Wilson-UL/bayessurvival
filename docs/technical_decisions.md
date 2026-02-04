@@ -26,6 +26,11 @@ Stan fits `shape` and `scale` on the log scale to keep the sampler stable. The p
 - Center the log-scale prior near the observed median, accounting for the relationship `median = scale × (log 2)^(1/shape)`.
 - Use moderate spread to allow the data to override the center if needed.
 
+**Reviewer notes / rationale**:
+- We use **event times only** (not censored) to avoid biasing the adaptive prior toward shorter times.
+- We enforce **generous upper bounds** on `shape` and `scale` in Stan to prevent numerical overflow during sampling. These are not intended to be informative constraints; they are safety bounds scaled to the observed time range.
+- If your time unit is unusual (e.g., hours vs years), consider rescaling time or supplying custom priors for interpretability.
+
 **Fallback defaults** (if adaptive fails):
 - `mu_log_shape = 0, sd_log_shape = 1` (shape near 1)
 - `mu_log_scale = 0, sd_log_scale = 2` (scale agnostic to units)
@@ -49,6 +54,9 @@ The exponential model has a single parameter - `rate`. The prior is a Gamma dist
 - Use the observed median to estimate `rate ≈ log(2) / median`.
 - Set a Gamma prior centered near that value: `shape = 2, rate = 2 / (log(2) / median)`.
 
+**Reviewer notes / rationale**:
+- The exponential prior is intentionally weak; if the time scale is far from 1, adaptive priors or rescaling time is recommended.
+
 **Fallback defaults**:
 - `rate_prior_shape = 1, rate_prior_rate = 1` 
 
@@ -69,6 +77,9 @@ Stan fits `mu` (location) and `sigma` (scale) for the lognormal distribution. Pr
 - Set `mu_prior_mean = median(log(t_obs))` to center on the observed scale.
 - Use a moderate standard deviation (`mu_prior_sd = 1.5`).
 - Let the prior on sigma scale with the median absolute deviation of log-times, clamped to a sensible range (0.2 to 2.5).
+
+**Reviewer notes / rationale**:
+- Priors are placed on `mu` and `sigma` on the log‑time scale, which keeps the model stable and interpretable across time units.
 
 **Fallback defaults**:
 - `mu_prior_mean = 0, mu_prior_sd = 2, sigma_prior_sd = 1`.
@@ -93,7 +104,7 @@ When you don't supply a `prior` argument, the code uses these defaults:
 
 ```r
 prior <- list(
-  a0 = 10, b0 = 1,        # Gamma(10, 1) prior on DP concentration alpha
+  a0 = 10, b0 = 10,       # Gamma(10, 10) prior on DP concentration alpha
   nu = 4,                 # degrees of freedom for base measure
   m0 = 0,                 # intercept mean
   S0 = matrix(25, 1, 1),  # intercept variance
@@ -104,7 +115,7 @@ prior <- list(
 )
 ```
 
-These settings encourage moderate clustering and a diffuse baseline that lets the data dominate. The specific numeric values come from the DPpackage documentation.
+These settings encourage moderate clustering and a diffuse baseline that lets the data dominate. We use a more conservative prior on the DP concentration (Gamma(10, 10), mean 1) to reduce extreme tail behavior under heavy right-censoring while keeping alpha learnable. The specific numeric values otherwise align with DPpackage examples and documentation.
 
 If you want tighter control over the concentration parameter you can fix `alpha` directly:
 
@@ -191,7 +202,4 @@ We've prioritised getting the core imputation workflow right (parametric and non
 3. Hierarchical group models. Groups are independent at the moment. A partial-pooling model could borrow strength if you have many small groups, but that would add complexity.
 
 4. Time-varying covariates. Not supported.
-
-
-
 

@@ -15,7 +15,7 @@
 #' @param n_imputations Number of imputed complete datasets to generate (default: 10)
 #' @param prior A named list of prior hyper-parameters (same structure as the
 #'   original `LDDPsurvival` prior list).  If `NULL`, sensible defaults are
-#'   constructed automatically. The default alpha prior is Gamma(10, 1), making
+#'   constructed automatically. The default alpha prior is Gamma(10, 10), making
 #'   the DP concentration parameter learnable.
 #' @param mcmc A named list with MCMC settings (`nburn`, `nsave`, `nskip`,
 #'   `ndisplay`).  Defaults to `nburn = 1000`, `nsave = 4000`, `nskip = 1`,
@@ -46,7 +46,7 @@
 #' status <- as.integer(t <= c)
 #' df <- data.frame(time, status)
 #'
-#' # Default: alpha ~ Gamma(10, 1) (learnable)
+#' # Default: alpha ~ Gamma(10, 10) (learnable)
 #' res <- bayes_np_impute(df, "time", "status", n_imputations = 10, verbose = FALSE,
 #'                        mcmc = list(nburn = 100, nsave = 200, nskip = 2, ndisplay = 100))
 #' 
@@ -210,7 +210,7 @@ bayes_np_impute_single <- function(data,
   # --- default prior --------------------------------------------------------
   if (is.null(prior)) {
     prior <- list(
-      a0 = 10, b0 = 1,                # alpha ~ Gamma(10, 1)  
+      a0 = 10, b0 = 10,               # alpha ~ Gamma(10, 10)
       nu = 4,
       m0 = 0,
       S0 = matrix(25, 1, 1),          

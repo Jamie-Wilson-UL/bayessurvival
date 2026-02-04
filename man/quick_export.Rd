@@ -13,7 +13,7 @@ quick_export(object, file_path, format = "csv", time_unit = "days", ...)
 
 \item{format}{Output format ("csv", "rds")}
 
-\item{time_unit}{Optional label describing the time unit (default "days")}
+\item{time_unit}{Unused; reserved for backward compatibility}
 
 \item{...}{Additional arguments forwarded to \code{export()}}
 }

@@ -10,7 +10,7 @@
 #' @param datasets Which datasets to save ("all", "first", or specific numbers)
 #' @param groups How to handle groups ("combined", "separate", or specific group name)
 #' @param include_original Whether to include original value columns
-#' @param combine If TRUE, write a single combined file across imputations 
+#' @param combine If TRUE, write a single combined file across imputations
 #' @param ... Additional arguments passed to writing functions
 #'
 #' @return Invisible list with file paths of saved files
@@ -116,6 +116,29 @@ export <- function(object, file_path,
   invisible(exported_files)
 }
 
+sanitize_filename_component <- function(x) {
+  safe <- gsub("[^A-Za-z0-9._-]+", "_", x)
+  safe <- gsub("^_+|_+$", "", safe)
+  if (!nzchar(safe)) "group" else safe
+}
+
+resolve_dataset_numbers <- function(data, dataset_numbers) {
+  if (is.character(dataset_numbers)) {
+    if (identical(dataset_numbers, "first")) return(1L)
+    if (identical(dataset_numbers, "all")) {
+      if (".imp" %in% names(data)) {
+        return(sort(unique(data$.imp)))
+      }
+      return(1L)
+    }
+    stop("datasets must be 'all', 'first', or a numeric vector")
+  }
+  if (is.numeric(dataset_numbers)) {
+    return(dataset_numbers)
+  }
+  stop("datasets must be 'all', 'first', or a numeric vector")
+}
+
 #' Export Group Imputed Data
 #' @keywords internal
 export_group_imputed_data <- function(object, file_path, format, datasets, groups, include_original, combine, ...) {
@@ -143,7 +166,8 @@ export_group_imputed_data <- function(object, file_path, format, datasets, group
     exported_files <- character()
     
     for (group_name in object$group_names) {
-      group_file_path <- paste0(file_path, "_", group_name)
+      group_safe <- sanitize_filename_component(group_name)
+      group_file_path <- paste0(file_path, "_", group_safe)
       
       if (identical(datasets, "first")) {
         group_data <- complete(object, dataset = 1, groups = group_name)
@@ -156,8 +180,8 @@ export_group_imputed_data <- function(object, file_path, format, datasets, group
       }
       
       group_files <- switch(format,
-        "csv" = export_csv(group_data, group_file_path, datasets, suffix = paste0("_", group_name), combine = combine, ...),
-        "rds" = export_rds(group_data, group_file_path, datasets, suffix = paste0("_", group_name), combine = combine, ...)
+        "csv" = export_csv(group_data, group_file_path, datasets, suffix = paste0("_", group_safe), combine = combine, ...),
+        "rds" = export_rds(group_data, group_file_path, datasets, suffix = paste0("_", group_safe), combine = combine, ...)
       )
       
       exported_files <- c(exported_files, group_files)
@@ -169,7 +193,8 @@ export_group_imputed_data <- function(object, file_path, format, datasets, group
       stop("Group '", groups, "' not found. Available: ", paste(object$group_names, collapse = ", "))
     }
     
-    group_file_path <- paste0(file_path, "_", groups)
+    group_safe <- sanitize_filename_component(groups)
+    group_file_path <- paste0(file_path, "_", group_safe)
     
     if (identical(datasets, "first")) {
       group_data <- complete(object, dataset = 1, groups = groups)
@@ -182,8 +207,8 @@ export_group_imputed_data <- function(object, file_path, format, datasets, group
     }
     
     exported_files <- switch(format,
-      "csv" = export_csv(group_data, group_file_path, datasets, suffix = paste0("_", groups), combine = combine, ...),
-      "rds" = export_rds(group_data, group_file_path, datasets, suffix = paste0("_", groups), combine = combine, ...)
+      "csv" = export_csv(group_data, group_file_path, datasets, suffix = paste0("_", group_safe), combine = combine, ...),
+      "rds" = export_rds(group_data, group_file_path, datasets, suffix = paste0("_", group_safe), combine = combine, ...)
     )
   }
   
@@ -225,16 +250,26 @@ export_csv <- function(data, file_path, dataset_numbers, suffix = "", combine = 
 #' Export as RDS
 #' @keywords internal
 export_rds <- function(data, file_path, dataset_numbers, suffix = "", combine = FALSE, ...) {
-  if (length(dataset_numbers) == 1) {
+  dataset_numbers <- resolve_dataset_numbers(data, dataset_numbers)
+
+  if (length(dataset_numbers) == 1 || isTRUE(combine)) {
     # Single file
     file_name <- paste0(file_path, suffix, ".rds")
     saveRDS(data, file_name, ...)
     return(file_name)
   } else {
-    # Single file with all datasets
-    file_name <- paste0(file_path, suffix, ".rds")
-    saveRDS(data, file_name, ...)
-    return(file_name)
+    # Multiple files (one per dataset)
+    if (!(".imp" %in% names(data))) {
+      stop("Cannot split RDS output without a '.imp' column")
+    }
+    file_names <- character()
+    for (i in dataset_numbers) {
+      dataset_data <- data[data$.imp == i, , drop = FALSE]
+      file_name <- paste0(file_path, "_dataset_", i, suffix, ".rds")
+      saveRDS(dataset_data, file_name, ...)
+      file_names <- c(file_names, file_name)
+    }
+    return(file_names)
   }
 }
 
@@ -245,7 +280,7 @@ export_rds <- function(data, file_path, dataset_numbers, suffix = "", combine = 
 #' @param object A bayesian_imputation object
 #' @param file_path Base file path
 #' @param format Output format ("csv", "rds")
-#' @param time_unit Optional label describing the time unit (default "days")
+#' @param time_unit Unused; reserved for backward compatibility
 #' @param ... Additional arguments forwarded to `export()`
 #'
 #' @return Invisible file path
@@ -258,11 +293,11 @@ export_rds <- function(data, file_path, dataset_numbers, suffix = "", combine = 
 #'
 #' @export
 quick_export <- function(object, file_path, format = "csv", time_unit = "days", ...) {
+  unused <- time_unit
   export(
     object = object,
     file_path = file_path,
     format = format,
-    time_unit = time_unit,
     ...
   )
 }

@@ -153,6 +153,8 @@ export(fit, "clean_results", format = "csv", include_original = FALSE)
 export(fit_grp, "groups", format = "csv", groups = "separate")
 ```
 
+When exporting multiple datasets to RDS, set `combine = FALSE` to write one file per dataset.
+
 ## Advanced Usage
 
 Custom priors and MCMC options are supported:

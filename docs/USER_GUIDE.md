@@ -150,6 +150,8 @@ export(fit_grp, "groups", format = "csv", groups = "separate")
 
 At the moment only CSV and RDS exports are enabled in the package. (Support for Excel/Stata/SPSS is planned, but not yet implemented.)
 
+When exporting multiple datasets to RDS, set `combine = FALSE` to write one file per dataset.
+
 ---
 
 ## Advanced Usage
