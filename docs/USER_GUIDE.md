@@ -13,25 +13,20 @@ devtools::install_github("Jamie-Wilson-UL/bayessurvival")
 library(bayessurvival)
 ```
 
-If you plan to use the parametric engines (Weibull, exponential, lognormal), you'll also need CmdStan the first time:
+If you plan to use the parametric engines (Weibull, exponential, lognormal), the models are compiled with `rstan` on first use. That requires a working C++ toolchain:
+
+- **Windows**: Install RTools (includes C++ compiler)
+- **macOS**: Install Xcode Command Line Tools: `xcode-select --install`
+- **Linux**: Install `g++` and `make` (e.g. `sudo apt-get install build-essential`)
+
+Recommended runtime settings:
 
 ```r
-install.packages("cmdstanr", repos = c("https://mc-stan.org/r-packages/", getOption("repos")))
-cmdstanr::install_cmdstan()
+rstan::rstan_options(auto_write = TRUE)
+options(mc.cores = parallel::detectCores())
 ```
 
-**Important**: Installing CmdStan requires a C++ toolchain. If you encounter errors during `cmdstanr::install_cmdstan()`, you may need to install additional development tools:
-
-- **Windows**: Install [RTools](https://cran.r-project.org/bin/windows/Rtools/) (includes C++ compiler)
-- **macOS**: Install Xcode Command Line Tools: `xcode-select --install` in Terminal
-- **Linux**: Install `g++` and `make` (usually pre-installed): `sudo apt-get install build-essential` (Ubuntu/Debian)
-
-You can check if your toolchain is ready with:
-```r
-cmdstanr::check_cmdstan_toolchain()
-```
-
-The nonparametric LDDP engine doesn't rely on CmdStan, so it will work even if you skip that step.
+The nonparametric LDDP engine doesn't rely on Stan, so it will work even if you skip the toolchain setup.
 
 Throughout the examples below, we use the classic `survival::lung` dataset:
 
@@ -55,14 +50,14 @@ fit <- impute(
 )
 ```
 
-By default, `impute()` tries to detect the time and status columns (looking for common names like `time`, `status`, `duration`, etc.). If your column names are unusual it’s advisable to specify them explicitly:
+By default, `impute()` tries to detect the time and status columns (looking for common names like `time`, `status`, `duration`, etc.). If your column names are unusual it is advisable to specify them explicitly:
 
 ```r
 fit <- impute(
   lung,
   time = "time",           # you can also pass indices, e.g. time = 3
   status = "status",
-                                 n_imputations = 5,
+  n_imputations = 5,
   distribution = "lognormal"
 )
 ```
@@ -103,7 +98,7 @@ plot(fit, type = "trace")      # MCMC convergence (requires bayesplot package)
 plot(fit, type = "pairs")      # parameter relationships (requires bayesplot package)
 ```
 
-Note: The `trace` and `pairs` plot types rely on the `bayesplot` package. If you see a message asking you to install it, just run `install.packages(c("bayesplot", "posterior"))` and the plots will work.
+Note: The `trace` and `pairs` plot types rely on the `bayesplot` package. If you see a message asking you to install it, run `install.packages(c("bayesplot", "posterior"))` and the plots will work.
 
 All of the group-specific objects (`impute(..., groups = ...)`) respond to the same plotting API. For example:
 
@@ -118,7 +113,7 @@ plot(fit_grp, type = "boxplots_comparison")
 
 ## Working with Completed Datasets
 
-The package stores completed datasets in a way that’s deliberately transparent. You can pull out one dataset or many, in either wide, long or list form:
+The package stores completed datasets in a way that is deliberately transparent. You can pull out one dataset or many, in either wide, long or list form:
 
 ```r
 complete(fit, dataset = 1)            # a single completed dataset
@@ -139,7 +134,7 @@ separate <- complete(fit_grp, dataset = 1, groups = "separate")
 
 ## Exporting
 
-When you’re satisfied with a fit, export the data in the format that suits your downstream work:
+When you are satisfied with a fit, export the data in the format that suits your downstream work:
 
 ```r
 export(fit, "weibull_results", format = "csv")
@@ -196,7 +191,7 @@ You can do the same for other distributions (`get_default_priors("lognormal")`, 
 A few quick checks:
 
 - **Columns not found**: inspect with `colnames(lung)` and specify `time = "..."`, `status = "..."` explicitly (indices work too).
-- **CmdStan not installed**: run `cmdstanr::install_cmdstan()` or set `model = "nonparametric"` temporarily.
+- **Stan compilation errors**: confirm your C++ toolchain is installed (RTools / Xcode CLT / build-essential).
 - **MCMC diagnostics**: call `plot(fit, type = "trace")` to inspect convergence; increase iterations if needed.
 - **Performance**: use fewer imputations (e.g., 5 instead of 50) or choose a faster distribution (`"exponential"`).
 - **Reusing draws**: if you want 100 datasets but already ran 20, use `generate_complete_datasets()` on the stored posterior draws rather than refitting.

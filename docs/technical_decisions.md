@@ -128,11 +128,11 @@ The LDDP model also accepts an `mcmc` list (`nburn`, `nsave`, `nskip`, `ndisplay
 
 ## 2. MCMC Defaults and Convergence Criteria
 
-### 2.1 Parametric models (Stan/cmdstanr)
+### 2.1 Parametric models (Stan/rstan)
 
-Parametric models run 4 chains of 1000 warmup + 2000 sampling iterations each, giving 8000 total posterior draws. We chose those numbers to balance speed with reliability. Most datasets converge comfortably within that budget and the multi-chain setup helps detect any sampling pathologies.
+Parametric models run 4 chains of 1000 warmup + 1000 sampling iterations each, giving 4000 total posterior draws. We chose those numbers to balance speed with reliability. Most datasets converge comfortably within that budget and the multi-chain setup helps detect any sampling pathologies.
 
-We also set `adapt_delta = 0.9` and `max_treedepth = 10` to keep divergences low. Those settings are a bit conservative, which slows things down slightly but avoids reruns.
+We also set `adapt_delta = 0.95` and `max_treedepth = 12` to keep divergences low. Those settings are a bit conservative, which slows things down slightly but avoids reruns.
 
 After each fit, we check that `max(Rhat) <= 1.1` across all parameters, this is the standard convergence threshold. We also look at effective sample sizes (ESS) and warn if bulk or tail ESS drop below 100. Divergent transitions and treedepth hits get reported but don't cause automatic failure. You can inspect traces with `plot(fit, type = "trace")` if something looks strange.
 
@@ -191,7 +191,6 @@ We've prioritised getting the core imputation workflow right (parametric and non
 3. Hierarchical group models. Groups are independent at the moment. A partial-pooling model could borrow strength if you have many small groups, but that would add complexity.
 
 4. Time-varying covariates. Not supported.
-
 
 
 
